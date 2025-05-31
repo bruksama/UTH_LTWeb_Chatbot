@@ -1,0 +1,36 @@
+{
+  "name": "uth_ltweb_chatbot",
+  "version": "1.0.0",
+  "description": "Đồ án kết thúc môn lập trình web",
+  "keywords": [
+    "chatbot",
+    "uth",
+    "nodejs",
+    "bootstrap",
+    "website"
+  ],
+  "homepage": "https://github.com/bruksama/UTH_LTWeb_Chatbot#readme",
+  "bugs": {
+    "url": "https://github.com/bruksama/UTH_LTWeb_Chatbot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bruksama/UTH_LTWeb_Chatbot.git"
+  },
+  "license": "ISC",
+  "author": "bruksama",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

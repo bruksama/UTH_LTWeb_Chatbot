@@ -19,6 +19,7 @@ UTH_Chatbot/
 ├── src/                      # Chứa mã nguồn backend
 │   └── server.js             # Triển khai logic API
 │
+├── .env                      # Chứa các thông tin nhạy cảm như API Key,...
 ├── package.json              # Danh sách các thư viện phụ thuộc và script
 ├── package-lock.json         # Ghi lại chính xác phiên bản của các thư viện
 └── README.md                 # Tệp này: tổng quan dự án và hướng dẫn cài đặt
@@ -44,15 +45,17 @@ UTH_Chatbot/
       - Phục vụ các tệp tĩnh từ thư mục `public/` (khi người dùng truy cập website, `index.html` sẽ được gửi về).
       - Định nghĩa các endpoint API.
 
-3.  **`package.json`**: Tệp manifest cho dự án Node.js.
+3. **`.env`**: Chứa các thông tin nhạy cảm của dự án.
+
+4.  **`package.json`**: Tệp manifest cho dự án Node.js.
 
     - Liệt kê thông tin dự án (tên, phiên bản, tác giả).
     - Đặc biệt, định nghĩa `dependencies` là các thư viện cần thiết để chạy dự án, và `devDependencies` chỉ dùng trong quá trình phát triển.
     - Chứa các `scripts` là các lệnh tắt để chạy các tác vụ phổ biến, ví dụ `npm start` để chạy server hoặc `npm run dev` để chạy với `nodemon` (tự động khởi động lại server khi có thay đổi).
 
-4.  **`package-lock.json`**: Được tạo/cập nhật tự động bởi `npm`. Ghi lại chính xác phiên bản của tất cả các thư viện đã cài đặt và các phụ thuộc con của chúng. Đảm bảo rằng bất kỳ ai cài đặt dự án cũng sẽ có đúng các phiên bản này, giúp dự án hoạt động nhất quán.
+5.  **`package-lock.json`**: Được tạo/cập nhật tự động bởi `npm`. Ghi lại chính xác phiên bản của tất cả các thư viện đã cài đặt và các phụ thuộc con của chúng. Đảm bảo rằng bất kỳ ai cài đặt dự án cũng sẽ có đúng các phiên bản này, giúp dự án hoạt động nhất quán.
 
-5.  **`README.md`**: Cung cấp thông tin về dự án, cấu trúc và hướng dẫn sử dụng.
+6.  **`README.md`**: Cung cấp thông tin về dự án, cấu trúc và hướng dẫn sử dụng.
 
 **Luồng dữ liệu (Khi người dùng gửi tin nhắn):**
 
@@ -70,6 +73,7 @@ UTH_Chatbot/
 
 - [Node.js](https://nodejs.org/) (bao gồm cả npm)
 - [Gemini API Key](https://aistudio.google.com/apikey)
+- Firebase
 
 **Cài đặt:**
 
@@ -77,6 +81,7 @@ UTH_Chatbot/
 
     ```bash
     git clone <repository-url>
+    cd UTH_LTWeb_Chatbot
     ```
 
 2.  Cài đặt các thư viện phụ thuộc:
@@ -89,6 +94,7 @@ UTH_Chatbot/
 
 - `GEMINI_API_KEY`: dán key đã chuẩn bị
 - `PORT`: nếu để trống, cổng mặc định là 3000
+- `FIREBASE_SERVICE_ACCOUNT`: là Firebase `serviceAccountKey.json` nhưng viết thành 1 dòng
 
 **Khởi chạy:**
 
@@ -98,9 +104,9 @@ UTH_Chatbot/
     npm start
     ```
 
-    Lệnh này sẽ khởi động server bằng Node trực tiếp.
+    Lệnh này sẽ khởi động server trực tiếp bằng Node.
 
-2.  **Chạy ở chế độ phát triển (tự động khởi động lại khi có thay đổi):**
+2.  **Chạy ở chế độ nhà phát triển (tự động khởi động lại khi có thay đổi):**
     ```bash
     npm run dev
     ```
@@ -112,7 +118,10 @@ Sau khi server chạy, bạn có thể truy cập chatbot bằng cách mở trì
 
 ## Việc cần làm / Định hướng phát triển
 
-- Tích hợp với dịch vụ NLP/AI nâng cao để phản hồi bot.
-- Thêm chức năng xác thực người dùng.
-- Lưu lịch sử chat vào cơ sở dữ liệu.
-- Bổ sung các thành phần UI tương tác hơn.
+- Tích hợp với dịch vụ NLP/AI nâng cao để phản hồi bot. ✅
+- Thêm chức năng xác thực người dùng. ✅
+- Lưu lịch sử chat vào cơ sở dữ liệu. ✅
+- Bổ sung các thành phần UI tương tác hơn:
+    - Thiết kế giao diện dành cho màn hình thiết bị di động
+    - Thiết kế giao diện dành cho màn hình máy tính   
+- Bổ sung các tài liệu cần thiết

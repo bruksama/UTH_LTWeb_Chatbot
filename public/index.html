@@ -4,18 +4,177 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UTH Chatbot</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
     <link
       rel="stylesheet"
-      href="assets/bootstrap-5.3.6-dist/css/bootstrap.min.css"
+      href="/assets/bootstrap-5.3.6-dist/css/bootstrap.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   </head>
   <body>
-    <div class="container">
-      <h1>UTH Chatbot</h1>
+    <div class="container-fluid h-100">
+      <div class="row h-100 flex-nowrap">
+        <!-- Sidebar (hidden on mobile) -->
+        <nav class="col-7 col-lg-2 flex-column text-white p-0 sidebar h-100">
+          <!-- Auth section -->
+          <div
+            class="d-flex align-items-center justify-content-between p-3"
+            style="background: #fafafa"
+          >
+            <button
+              class="btn btn-outline-light btn-sm rounded-pill px-3"
+              id="logoutBtn"
+              aria-label="Logout"
+            >
+              <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </button>
+            <button
+              class="btn btn-light btn-sm rounded-circle d-lg-none ms-2"
+              id="closeSidebar"
+              aria-label="Close sidebar"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="px-3 mt-3">
+            <span class="fw-semibold text-muted" style="font-size: 0.9rem"
+              >RECENT CHATS</span
+            >
+          </div>
+          <ul
+            class="list-group list-group-flush flex-grow-1 overflow-auto"
+            id="chatList"
+          ></ul>
+          <div class="p-3 border-top border-light">
+            <a href="/">
+              <button class="btn btn-outline-light w-100">
+                <i class="fas fa-plus"></i> New Chat
+              </button>
+            </a>
+          </div>
+        </nav>
+        <!-- Sidebar backdrop overlay for mobile -->
+        <div class="sidebar-backdrop d-lg-none"></div>
+        <!-- Chat Area -->
+        <main
+          class="col-12 col-lg-10 d-flex flex-column h-100 chat-container p-0"
+        >
+          <!-- Chat Header -->
+          <div
+            class="header d-flex align-items-center justify-content-between bg-white border-bottom px-4 py-3 shadow-sm"
+          >
+            <button
+              class="btn d-lg-none toggle-sidebar-btn ms-2"
+              id="openSidebar"
+              aria-label="Open sidebar"
+            >
+              <span class="visually-hidden">Open sidebar</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+              </svg>
+            </button>
+            <div class="d-flex align-items-center gap-2">
+              <span class="fs-5 fw-semibold">UTH Chatbot</span>
+            </div>
+            <button
+              class="btn ms-2"
+              id="chatOptions"
+              data-bs-toggle="modal"
+              data-bs-target="#settingsModal"
+              aria-label="Open settings"
+            >
+              <i class="fas fa-gear"></i>
+            </button>
+          </div>
+          <!-- Chat Messages -->
+          <div
+            class="flex-grow-1 overflow-auto px-4 py-3 bg-light chat-messages"
+            id="chatMessages"
+          ></div>
+          <!-- Chat Input -->
+          <form
+            class="d-flex align-items-center gap-2 border-top bg-white px-4 py-3"
+            id="chatForm"
+            autocomplete="off"
+          >
+            <input
+              type="text"
+              class="form-control rounded-pill"
+              id="chatInput"
+              placeholder="Type your message..."
+            />
+            <button
+              class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+              type="submit"
+              style="width: 44px; height: 44px"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+        </main>
+      </div>
     </div>
-
-    <script src="js/script.js"></script>
-    <script src="assets/bootstrap-5.3.6-dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Settings Modal -->
+    <div
+      class="modal fade"
+      id="settingsModal"
+      tabindex="-1"
+      aria-labelledby="settingsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="settingsModalLabel">
+              <i class="fas fa-gear me-2"></i>Settings
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted">
+              Settings content goes here. (Theme, bot style, etc.)
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/js/script.js"></script>
+    <script src="/assets/bootstrap-5.3.6-dist/js/bootstrap.bundle.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
   </body>
 </html>

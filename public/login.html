@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - UTH Chatbot</title>
+    <link
+      rel="stylesheet"
+      href="assets/bootstrap-5.3.6-dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0d6efd 0%, #2563eb 100%);
+      }
+      .login-card {
+        max-width: 400px;
+        margin: 8vh auto;
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      }
+      .login-logo {
+        font-size: 2.5rem;
+        color: #0d6efd;
+      }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script>
+      // TODO: Thay config này bằng config thật của bạn nếu cần
+      const firebaseConfig = {
+        apiKey: "AIzaSyBxu_Ocz0Bpsg5P90NlV1JI8P2QgPmHdAI",
+        authDomain: "uth-chatbot-a5815.firebaseapp.com",
+        projectId: "uth-chatbot-a5815",
+        storageBucket: "uth-chatbot-a5815.appspot.com",
+        messagingSenderId: "699604759720",
+        appId: "1:699604759720:web:0d9fe4f7c6b75020543e9d",
+        measurementId: "G-WEHGX8X81T",
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      document.addEventListener("DOMContentLoaded", function () {
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (user) window.location.href = "/";
+        });
+        document.getElementById("loginGoogle").onclick = function () {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          firebase
+            .auth()
+            .signInWithPopup(provider)
+            .then(() => (window.location.href = "/"))
+            .catch((err) => {
+              document.getElementById("loginError").textContent = err.message;
+            });
+        };
+      });
+    </script>
+  </head>
+  <body>
+    <div
+      class="container d-flex align-items-center justify-content-center min-vh-100"
+    >
+      <div class="card login-card p-4">
+        <div class="text-center mb-4">
+          <span class="login-logo"><i class="fas fa-robot"></i></span>
+          <h2 class="mt-2 mb-0">UTH Chatbot</h2>
+          <div class="text-muted">Đăng nhập để tiếp tục</div>
+        </div>
+        <button id="loginGoogle" class="btn btn-primary w-100 mb-2">
+          <i class="fab fa-google me-2"></i>Đăng nhập với Google
+        </button>
+        <div id="loginError" class="text-danger text-center small mt-2"></div>
+      </div>
+    </div>
+  </body>
+</html>

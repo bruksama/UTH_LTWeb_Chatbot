@@ -1,127 +1,119 @@
-# UTH Chatbot
+# UTH_LTWeb_Chatbot
 
-Đồ án website chatbot đơn giản được xây dựng với Node.js, Express và giao diện tĩnh sử dụng HTML, CSS, JavaScript và Bootstrap.
+Website chatbot AI đa phong cách, xây dựng với Node.js, Express, Gemini API, Firebase và giao diện tĩnh sử dụng HTML, CSS, JavaScript, Bootstrap 5.
 
-## Cấu trúc dự án & Quy trình làm việc
+## 1. Tổng quan dự án
 
-Dự án này tuân theo cấu trúc tiêu chuẩn của một ứng dụng web với backend Node.js và frontend tĩnh. Dưới đây là mô tả các thư mục và tệp chính:
+- Chatbot AI trả lời tự nhiên, đa phong cách
+- Xác thực người dùng qua Firebase OAuth
+- Lưu trữ lịch sử chat theo từng phiên, từng user trên Firestore
+- Giao diện responsive, tối ưu UI/UX, toast/modal chuẩn accessibility
+
+## 2. Cấu trúc dự án
 
 ```plaintext
-UTH_Chatbot/
-├── public/                   # Chứa tất cả tài nguyên frontend tĩnh
-│   ├── assets/               # Chứa các tài nguyên phụ thuộc, như Bootstrap, các hình ảnh,...
-│   ├── css/
-│   │   └── style.css         # CSS chính cho website
-│   ├── js/
-│   │   └── script.js         # JavaScript chính cho website, thực hiện xử lý phía Client
-│   └── index.html            # Tệp HTML chính
-│
-├── src/                      # Chứa mã nguồn backend
-│   └── server.js             # Triển khai logic API
-│
-├── .env                      # Chứa các thông tin nhạy cảm như API Key,...
-├── package.json              # Danh sách các thư viện phụ thuộc và script
-├── package-lock.json         # Ghi lại chính xác phiên bản của các thư viện
-└── README.md                 # Tệp này: tổng quan dự án và hướng dẫn cài đặt
+UTH_LTWeb_Chatbot/
+├── public/                # Tài nguyên frontend tĩnh (HTML, CSS, JS, assets)
+├── src/
+│   ├── backend/           # Mã nguồn backend (API, service, middleware)
+│   └── shared/            # Tài nguyên dùng chung khác, style bot, util
+├── package.json           # Thư viện phụ thuộc & script
+├── pnpm-lock.yaml         # Quản lý version phụ thuộc
+└── README.md              # Tài liệu này
 ```
 
-**Giải thích quy trình làm việc:**
+## 3. Luồng hoạt động
 
-1.  **Thư mục `public/`**: Đây là nơi chứa tất cả các tệp phía client sẽ được phục vụ trực tiếp tới trình duyệt người dùng.
+1. Người dùng đăng nhập qua Firebase OAuth
+2. Truy cập giao diện chính `/`
+3. Lấy danh sách phiên chat `/api/chat/sessions`
+4. Tạo phiên mới `/api/chat/newSession` (chọn style)
+5. Gửi tin nhắn `/api/chat/sendMessage` (backend xử lý, lưu, trả kết quả)
+6. Lưu toàn bộ lịch sử chat trên Firestore
 
-    - **`public/assets/`**: Chứa các tài nguyên phụ thuộc như hình ảnh, thư viện,...
-    - **`public/css/style.css`**: Chứa các quy tắc tạo kiểu giao diện. Định nghĩa cách các thành phần trong `index.html` hiển thị (màu sắc, bố cục, phông chữ, ...).
-    - **`public/js/script.js`**: Xử lý toàn bộ logic tương tác phía frontend, bao gồm:
-      - Lắng nghe nhập liệu của người dùng (gõ tin nhắn, nhấn gửi).
-      - Gửi tin nhắn của người dùng tới backend API.
-      - Nhận phản hồi từ backend API.
-      - Hiển thị tin nhắn của người dùng và bot lên giao diện chat (`index.html`).
-    - **`public/index.html`**: Trang chính mà người dùng nhìn thấy. Cấu trúc giao diện chat (trường nhập liệu, khu vực hiển thị tin nhắn) và liên kết tới `style.css` (tạo kiểu) và `script.js` (chức năng). Bao gồm cả Bootstrap để sử dụng các thành phần UI dựng sẵn.
+## 4. API Backend
 
-2.  **Thư mục `src/`**: Chứa logic phía server.
+| Method | Endpoint              | Chức năng                                 |
+| ------ | --------------------- | ----------------------------------------- |
+| POST   | /api/auth/login       | Xác thực Firebase ID token                |
+| GET    | /api/chat/sessions    | Lấy danh sách phiên chat của user         |
+| POST   | /api/chat/newSession  | Tạo phiên chat mới, chọn style            |
+| GET    | /api/chat/session/:id | Lấy toàn bộ tin nhắn trong một phiên      |
+| POST   | /api/chat/sendMessage | Gửi message, gọi Gemini API, lưu & trả về |
 
-    - **`src/server.js`**: Sử dụng Node.js và Express để:
-      - Tạo HTTP server.
-      - Phục vụ các tệp tĩnh từ thư mục `public/` (khi người dùng truy cập website, `index.html` sẽ được gửi về).
-      - Định nghĩa các endpoint API.
+## 5. Firestore Structure
 
-3. **`.env`**: Chứa các thông tin nhạy cảm của dự án.
+```
+users (collection)
+  └─ {userId} (document)
+      ├─ email, displayName
+      └─ sessions (subcollection)
+          └─ {sessionId} (document)
+              ├─ title, botStyle, debugMode
+              └─ messages (subcollection)
+                  └─ {messageId} (sender, content, timestamp)
+```
 
-4.  **`package.json`**: Tệp manifest cho dự án Node.js.
+## 6. Cài đặt & chạy dự án
 
-    - Liệt kê thông tin dự án (tên, phiên bản, tác giả).
-    - Đặc biệt, định nghĩa `dependencies` là các thư viện cần thiết để chạy dự án, và `devDependencies` chỉ dùng trong quá trình phát triển.
-    - Chứa các `scripts` là các lệnh tắt để chạy các tác vụ phổ biến, ví dụ `npm start` để chạy server hoặc `npm run dev` để chạy với `nodemon` (tự động khởi động lại server khi có thay đổi).
+### Yêu cầu
 
-5.  **`package-lock.json`**: Được tạo/cập nhật tự động bởi `npm`. Ghi lại chính xác phiên bản của tất cả các thư viện đã cài đặt và các phụ thuộc con của chúng. Đảm bảo rằng bất kỳ ai cài đặt dự án cũng sẽ có đúng các phiên bản này, giúp dự án hoạt động nhất quán.
+- Node.js >= 18
+- pnpm (hoặc npm)
+- Gemini API Key
+- Firebase Service Account (Firestore, Auth)
 
-6.  **`README.md`**: Cung cấp thông tin về dự án, cấu trúc và hướng dẫn sử dụng.
+### Cài đặt
 
-**Luồng dữ liệu (Khi người dùng gửi tin nhắn):**
+```bash
+# Clone repo
+$ git clone <repository-url>
+$ cd UTH_LTWeb_Chatbot
 
-1.  Người dùng nhập tin nhắn trên trình duyệt (`public/index.html`) và nhấn "Send".
-2.  `public/js/script.js` bắt sự kiện và lấy nội dung tin nhắn.
-3.  `script.js` gửi yêu cầu HTTP POST tới endpoint trên server, kèm theo tin nhắn trong body.
-4.  `src/server.js` (ứng dụng Express) nhận yêu cầu.
-5.  Logic phía server xử lý tin nhắn.
-6.  `server.js` gửi phản hồi HTTP về cho client (trình duyệt), thường ở dạng JSON.
-7.  `script.js` nhận phản hồi và cập nhật `index.html` để hiển thị tin nhắn của bot trong khung chat.
+# Cài đặt phụ thuộc
+$ pnpm install
+# hoặc
+$ npm install
+```
 
-## Cài đặt và chạy Chatbot
+### Thiết lập cấu hình
 
-**Yêu cầu:**
+- Tạo file `.env` từ mẫu `.env.example` và điền:
+  - `GEMINI_API_KEY`: API key Gemini
+  - `FIREBASE_SERVICE_ACCOUNT`: Thông tin service account Firebase (JSON)
+  - `PORT`: (tuỳ chọn, mặc định 3000)
 
-- [Node.js](https://nodejs.org/) (bao gồm cả npm)
-- [Gemini API Key](https://aistudio.google.com/apikey)
-- Firebase
+### Khởi chạy
 
-**Cài đặt:**
+```bash
+# Production
+$ pnpm start
+# hoặc
+$ npm start
 
-1.  Clone repository (hoặc tải về các tệp):
+# Phát triển (tự reload khi code thay đổi)
+$ pnpm run dev
+# hoặc
+$ npm run dev
+```
 
-    ```bash
-    git clone <repository-url>
-    cd UTH_LTWeb_Chatbot
-    ```
+Truy cập: [http://localhost:3000](http://localhost:3000)
 
-2.  Cài đặt các thư viện phụ thuộc:
+## 7. Bảo mật & tối ưu
 
-    ```bash
-    npm install
-    ```
+- Tích hợp rate limit (60 request/phút/IP) cho API
+- Validate dữ liệu đầu vào, sanitize dữ liệu trả về
+- Không hardcode thông tin bí mật, bảo mật token
+- Thường xuyên cập nhật dependencies, kiểm tra lỗ hổng
 
-3.  Đổi tên tệp `.env.exapmple` thành `.env`, sau đó tùy chỉnh:
+## 8. Định hướng phát triển
 
-- `GEMINI_API_KEY`: dán key đã chuẩn bị
-- `PORT`: nếu để trống, cổng mặc định là 3000
-- `FIREBASE_SERVICE_ACCOUNT`: là Firebase `serviceAccountKey.json` nhưng viết thành 1 dòng
+- Bổ sung các style bot mới, tuỳ biến sâu hơn
+- Thêm phân tích biểu đồ, gợi ý hỏi tiếp
+- Tối ưu UI/UX, accessibility, trạng thái toast
+- Bổ sung unit test cho backend
+- Tích hợp thêm dịch vụ AI khác nếu cần
 
-**Khởi chạy:**
+---
 
-1.  **Chạy ở chế độ production:**
-
-    ```bash
-    npm start
-    ```
-
-    Lệnh này sẽ khởi động server trực tiếp bằng Node.
-
-2.  **Chạy ở chế độ nhà phát triển (tự động khởi động lại khi có thay đổi):**
-    ```bash
-    npm run dev
-    ```
-    Sử dụng `nodemon` để theo dõi thay đổi trong mã nguồn và tự động khởi động lại server.
-
-Sau khi server chạy, bạn có thể truy cập chatbot bằng cách mở trình duyệt và vào địa chỉ:
-
-[http://localhost:3000](http://localhost:3000) hoặc cổng được tùy chỉnh trong `.env`
-
-## Việc cần làm / Định hướng phát triển
-
-- Tích hợp với dịch vụ NLP/AI nâng cao để phản hồi bot. ✅
-- Thêm chức năng xác thực người dùng. ✅
-- Lưu lịch sử chat vào cơ sở dữ liệu. ✅
-- Bổ sung các thành phần UI tương tác hơn:
-    - Thiết kế giao diện dành cho màn hình thiết bị di động
-    - Thiết kế giao diện dành cho màn hình máy tính   
-- Bổ sung các tài liệu cần thiết
+**Mọi góp ý, báo lỗi hoặc đề xuất vui lòng tạo issue trên repository.**

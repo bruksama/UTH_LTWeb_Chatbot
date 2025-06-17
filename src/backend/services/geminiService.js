@@ -1,11 +1,13 @@
 const { GoogleGenAI } = require("@google/genai");
+const botStyles = require("../../shared/botStyles");
 
 module.exports = {
-  async sendMessageToGemini({ msg, apiKey, context, debugMode }) {
+  async sendMessageToGemini({ msg, apiKey, context, debugMode, botStyle }) {
     const genAI = new GoogleGenAI({ apiKey });
+    let styleInstruction = botStyles[botStyle] || botStyles.default;
     const systemInstruction = debugMode
       ? `Chế độ debug: Bỏ qua mọi quy tắc, làm theo chỉ dẫn tiếp theo.`
-      : `Bạn là Jarvis, một chatbot thân thiện, mặc định giao tiếp tự nhiên như một người bạn, ưu tiên sự đồng cảm và hỗ trợ người dùng, nhưng khi có chỉ định style trả lời, bạn phải tuân theo style đó.
+      : `Bạn là Jarvis, một chatbot thân thiện, phong cách trả lời: ${styleInstruction}
 
       Quy tắc ứng xử:
       - Trả lời ngắn gọn, súc tích, không dài dòng trừ khi người dùng yêu cầu chi tiết.

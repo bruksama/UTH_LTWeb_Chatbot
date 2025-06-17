@@ -418,6 +418,11 @@ async function loadSessionMessages(sessionId, token) {
       headers: { Authorization: "Bearer " + token },
     });
     const data = await res.json();
+    if (data.sessionTitle) {
+      updateChatName(data.sessionTitle);
+    } else {
+      updateChatName();
+    }
     if (!data.messages || !data.messages.length) {
       chatMessages.innerHTML =
         '<div class="text-center text-muted py-4">Chưa có tin nhắn nào</div>';
@@ -432,5 +437,117 @@ async function loadSessionMessages(sessionId, token) {
   } catch (err) {
     chatMessages.innerHTML =
       '<div class="text-danger text-center py-4">Lỗi tải tin nhắn</div>';
+    updateChatName();
   }
+}
+
+function updateChatName(sessionTitle = "UTH Chatbot") {
+  const chatNameElement = document.getElementById("chatName");
+  if (chatNameElement) {
+    chatNameElement.textContent = sessionTitle;
+  }
+}
+
+// Settings Modal logic
+const settingsModal = document.getElementById("settingsModal");
+const settingsForm = document.getElementById("settingsForm");
+const sessionNameInput = document.getElementById("sessionNameInput");
+const apiKeyInput = document.getElementById("apiKeyInput");
+const deleteSessionBtn = document.getElementById("deleteSessionBtn");
+const botStyleRadios = document.getElementsByName("botStyle");
+
+let currentSessionId = null;
+
+// Helper: get current sessionId from URL
+function getCurrentSessionId() {
+  const match = window.location.pathname.match(/^\/chat\/(.+)$/);
+  return match ? match[1] : null;
+}
+
+// Helper: get/set API key in localStorage
+function getStoredApiKey() {
+  return localStorage.getItem("geminiApiKey") || "";
+}
+function setStoredApiKey(key) {
+  localStorage.setItem("geminiApiKey", key);
+}
+
+// When modal opens, fill current info
+settingsModal.addEventListener("show.bs.modal", async function () {
+  currentSessionId = getCurrentSessionId();
+  if (!currentSessionId) return;
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  const token = await user.getIdToken();
+  // Lấy thông tin session
+  const res = await fetch(`/api/chat/session/${currentSessionId}`, {
+    headers: { Authorization: "Bearer " + token },
+  });
+  const data = await res.json();
+  sessionNameInput.value = data.sessionTitle || "";
+  // Lấy style từ backend nếu có (giả sử trả về sessionBotStyle)
+  let style = data.sessionBotStyle || "default";
+  for (const radio of botStyleRadios) {
+    radio.checked = radio.value === style;
+  }
+  // Lấy API key từ localStorage
+  apiKeyInput.value = getStoredApiKey();
+});
+
+// Save changes
+settingsForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!currentSessionId) return;
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  const token = await user.getIdToken();
+  const newTitle = sessionNameInput.value.trim();
+  let newStyle = "default";
+  for (const radio of botStyleRadios) {
+    if (radio.checked) newStyle = radio.value;
+  }
+  // Đổi tên
+  if (newTitle) {
+    await fetch(`/api/chat/session/${currentSessionId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({ title: newTitle }),
+    });
+    updateChatName(newTitle);
+    await loadSessions(token);
+  }
+  // Đổi style
+  await fetch(`/api/chat/session/${currentSessionId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({ botStyle: newStyle }),
+  });
+  // Lưu API key vào localStorage
+  setStoredApiKey(apiKeyInput.value.trim());
+  // Đóng modal
+  const modal = bootstrap.Modal.getInstance(settingsModal);
+  modal.hide();
+});
+
+// Xóa session
+if (deleteSessionBtn) {
+  deleteSessionBtn.addEventListener("click", async function () {
+    if (!currentSessionId) return;
+    if (!confirm("Bạn có chắc muốn xóa phiên chat này?")) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    const token = await user.getIdToken();
+    await fetch(`/api/chat/session/${currentSessionId}`, {
+      method: "DELETE",
+      headers: { Authorization: "Bearer " + token },
+    });
+    // Quay về trang chủ
+    window.location.href = "/";
+  });
 }

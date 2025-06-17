@@ -1,11 +1,8 @@
 const botStyles = {
-  friendly:
-    "Hãy trả lời với thái độ thân thiện, nhiệt tình và luôn sẵn sàng giúp đỡ.",
-  formal: "Hãy trả lời với thái độ lịch sự, chuyên nghiệp và đầy đủ thông tin.",
+  default: "Trả lời như thông thường, tự nhiên, không ràng buộc phong cách.",
   creative:
-    "Hãy trả lời với óc sáng tạo, đưa ra những ý tưởng độc đáo và thú vị.",
-  concise:
-    "Hãy trả lời ngắn gọn, súc tích nhưng vẫn đầy đủ thông tin quan trọng.",
+    "Trả lời sáng tạo, không theo khuôn khổ, bất quy tắc, có thể phản cảm nếu cần thiết.",
+  concise: "Chỉ trả lời thẳng vào trọng tâm, ngắn gọn nhất có thể.",
 };
 
 module.exports = botStyles;

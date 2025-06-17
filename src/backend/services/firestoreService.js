@@ -93,4 +93,13 @@ module.exports = {
       .doc(sessionId)
       .update({ debugMode });
   },
+  // Cập nhật botStyle cho session
+  async setSessionBotStyle(uid, sessionId, botStyle) {
+    await db
+      .collection("users")
+      .doc(uid)
+      .collection("sessions")
+      .doc(sessionId)
+      .update({ botStyle });
+  },
 };

@@ -114,7 +114,7 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
     );
     const messages = await firestoreService.getSessionMessages(uid, sessionId);
 
-    const context = messages.map((m) => ({
+    const context = messages.slice(0, -1).map((m) => ({
       role: m.sender,
       parts: [{ text: m.content }],
     }));

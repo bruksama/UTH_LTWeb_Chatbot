@@ -16,6 +16,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   </head>
@@ -115,12 +119,12 @@
             id="chatForm"
             autocomplete="off"
           >
-            <input
-              type="text"
-              class="form-control rounded-pill"
+            <textarea
+              class="form-control"
               id="chatInput"
               placeholder="Type your message..."
-            />
+              rows="1"
+            ></textarea>
             <button
               class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
               type="submit"
@@ -241,11 +245,8 @@
         </div>
       </div>
     </div>
-    <script src="/js/script.js"></script>
     <script src="/assets/bootstrap-5.3.6-dist/js/bootstrap.bundle.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/js/script.js"></script>
   </body>
 </html>

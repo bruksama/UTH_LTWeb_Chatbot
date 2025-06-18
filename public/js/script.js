@@ -9,6 +9,12 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
+marked.use({
+  breaks: true,
+  gfm: true,
+  pedantic: false,
+});
+
 document.addEventListener("DOMContentLoaded", function () {
   firebase.auth().onAuthStateChanged(function (user) {
     if (!user) {
@@ -131,7 +137,9 @@ function appendMessage(content, isBot = false) {
   msgDiv.className = "d-flex mb-3 animate__animated animate__fadeInUp";
   msgDiv.innerHTML = `<div class="${
     isBot ? "bg-white border me-auto" : "bg-primary text-white ms-auto"
-  } rounded-3 p-3 shadow-sm" style="max-width: 70%;">${content}</div>`;
+  } rounded-3 p-3 shadow-sm" style="max-width: 70%;">${marked.parse(
+    content
+  )}</div>`;
   chatMessages.appendChild(msgDiv);
   scrollToLastMessage();
 }
@@ -169,7 +177,7 @@ if (chatForm && chatInput && chatMessages) {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify({ title: "New Chat", botStyle: "formal" }),
+        body: JSON.stringify({ title: "New Chat", botStyle: "default" }),
       });
       const data = await res.json();
       if (data.sessionId) {
@@ -185,8 +193,8 @@ if (chatForm && chatInput && chatMessages) {
     appendMessage(value, false);
     lastUserMessage = value;
     chatInput.value = "";
+    chatInput.style.height = "auto";
     chatInput.focus();
-    // Show bot typing
     const typingDiv = showBotTyping();
     try {
       const res = await fetch("/api/chat/sendMessage", {
@@ -299,8 +307,9 @@ async function fetchAndSetLastMessage(sessionId, lastMsgElem) {
     const data = await res.json();
     if (data.messages && data.messages.length > 0) {
       const last = data.messages[data.messages.length - 1].content;
-      lastMsgElem.textContent =
-        last.length > 24 ? last.slice(0, 24) + "…" : last;
+      lastMsgElem.textContent = escapeHtml(
+        last.length > 24 ? last.slice(0, 24) + "…" : last
+      );
     } else {
       lastMsgElem.textContent = "";
     }
@@ -346,10 +355,11 @@ async function loadSessions(token) {
       lastMsg.style.maxWidth = "200px";
       let lastMessageText = session.lastMessage;
       if (lastMessageText) {
-        lastMsg.textContent =
+        lastMsg.textContent = escapeHtml(
           lastMessageText.length > 24
             ? lastMessageText.slice(0, 24) + "…"
-            : lastMessageText;
+            : lastMessageText
+        );
       } else {
         lastMsg.textContent = "Đang tải...";
         fetchAndSetLastMessage(session.id, lastMsg);
@@ -550,4 +560,31 @@ if (deleteSessionBtn) {
     // Quay về trang chủ
     window.location.href = "/";
   });
+}
+
+chatInput.addEventListener("input", function () {
+  this.style.height = "auto";
+  const newHeight = Math.min(this.scrollHeight, 7 * 24);
+  this.style.height = newHeight + "px";
+});
+
+chatInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    chatForm.requestSubmit();
+  } else if (e.key === "Enter" && e.shiftKey) {
+    e.preventDefault();
+    const cursorPosition = this.selectionStart;
+    const textBefore = this.value.substring(0, cursorPosition);
+    const textAfter = this.value.substring(cursorPosition);
+    this.value = textBefore + "\n" + textAfter;
+    this.selectionStart = this.selectionEnd = cursorPosition + 1;
+    this.style.height = "auto";
+    this.style.height = Math.min(this.scrollHeight, 7 * 24) + "px";
+  }
+});
+
+function escapeHtml(text) {
+  if (typeof text !== "string") return text;
+  return text.replace(/<[^>]*>/g, "");
 }

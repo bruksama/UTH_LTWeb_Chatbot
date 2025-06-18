@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const DOMPurify = require("dompurify");
 const { JSDOM } = require("jsdom");
+const { marked } = require("marked");
 const purify = DOMPurify(new JSDOM("").window);
 
 const firestoreService = require("../services/firestoreService");
@@ -10,6 +11,12 @@ const geminiService = require("../services/geminiService");
 const authenticateFirebaseToken = require("../middlewares/firebaseAuth");
 
 const ALLOWED_BOT_STYLES = ["default", "creative", "concise"];
+
+marked.use({
+  breaks: true,
+  gfm: true,
+  pedantic: false,
+});
 
 function isValidTitle(title) {
   return (
@@ -110,7 +117,7 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
       uid,
       sessionId,
       "user",
-      purify.sanitize(msg)
+      purify.sanitize(marked.parse(msg))
     );
     const messages = await firestoreService.getSessionMessages(uid, sessionId);
 
@@ -121,16 +128,19 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
     const last1000Messages = context.slice(-1000);
 
     try {
-      const reply = purify.sanitize(
-        await geminiService.sendMessageToGemini({
-          msg,
-          apiKey: apiKeyToUse,
-          context: last1000Messages,
-          debugMode,
-          botStyle,
-        })
+      const reply = await geminiService.sendMessageToGemini({
+        msg,
+        apiKey: apiKeyToUse,
+        context: last1000Messages,
+        debugMode,
+        botStyle,
+      });
+      await firestoreService.saveMessage(
+        uid,
+        sessionId,
+        "model",
+        purify.sanitize(marked.parse(reply))
       );
-      await firestoreService.saveMessage(uid, sessionId, "model", reply);
       res.status(201).json({ reply });
     } catch (err) {
       if (err.message && err.message.includes("API_KEY_INVALID")) {

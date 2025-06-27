@@ -141,7 +141,18 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
         "model",
         purify.sanitize(marked.parse(reply))
       );
-      res.status(201).json({ reply });
+      // Generate suggestions using the last 5 messages as context
+      let suggestions = [];
+      try {
+        const suggestionContext = context.slice(-5);
+        suggestions = await geminiService.generateSuggestions({
+          context: suggestionContext,
+          apiKey: apiKeyToUse,
+        });
+      } catch (e) {
+        suggestions = [];
+      }
+      res.status(201).json({ reply, suggestions });
     } catch (err) {
       if (err.message && err.message.includes("API_KEY_INVALID")) {
         res.status(500).json({

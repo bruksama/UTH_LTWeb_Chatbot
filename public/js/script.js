@@ -151,6 +151,34 @@ function shakeInput() {
   }, 600);
 }
 
+function renderSuggestions(suggestions) {
+  const container = document.getElementById("chatSuggestions");
+  if (!container) return;
+  container.innerHTML = "";
+  if (Array.isArray(suggestions) && suggestions.length > 0) {
+    suggestions.slice(0, 3).forEach((sugg, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className =
+        "btn btn-outline-secondary btn-sm me-2 mb-2 chat-suggestion-btn";
+      btn.textContent = sugg;
+      btn.setAttribute("tabindex", 0);
+      btn.addEventListener("click", () => {
+        chatInput.value = sugg;
+        chatForm.dispatchEvent(
+          new Event("submit", { cancelable: true, bubbles: true })
+        );
+      });
+      container.appendChild(btn);
+    });
+  }
+}
+
+function clearSuggestions() {
+  const container = document.getElementById("chatSuggestions");
+  if (container) container.innerHTML = "";
+}
+
 if (chatForm && chatInput && chatMessages) {
   chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -159,6 +187,7 @@ if (chatForm && chatInput && chatMessages) {
       shakeInput();
       return;
     }
+    clearSuggestions();
     // Lấy sessionId từ URL
     let match = window.location.pathname.match(/^\/chat\/(.+)$/);
     let sessionId = match ? match[1] : null;
@@ -212,11 +241,15 @@ if (chatForm && chatInput && chatMessages) {
       } else {
         appendMessage("Bot không trả lời. Vui lòng thử lại.", true);
       }
+      if (data.suggestions && Array.isArray(data.suggestions)) {
+        renderSuggestions(data.suggestions);
+      }
     } catch (err) {
       removeBotTyping();
       appendMessage("Lỗi gửi tin nhắn. Vui lòng thử lại.", true);
     }
   });
+  chatInput.addEventListener("input", clearSuggestions);
 }
 
 // Add dot-typing animation CSS

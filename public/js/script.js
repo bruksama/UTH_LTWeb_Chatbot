@@ -199,14 +199,16 @@ if (chatForm && chatInput && chatMessages) {
     const token = await user.getIdToken();
     // Nếu chưa chọn phiên chat, tạo mới
     if (!sessionId) {
-      // Có thể hỏi tên hoặc style, ở đây mặc định
       const res = await fetch("/api/chat/newSession", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify({ title: "New Chat", botStyle: "default" }),
+        body: JSON.stringify({
+          title: "Đoạn hội thoại mới",
+          botStyle: "default",
+        }),
       });
       const data = await res.json();
       if (data.sessionId) {

@@ -48,6 +48,7 @@ module.exports = {
     Lưu ý:
     - Không định dạng markdown, chỉ trả về mảng JSON 3 chuỗi, cũng không được định dạng markdown trong 3 chuỗi này.
     - Khi sử dụng các ký tự đặc biệt, cần chú ý không làm phá vỡ cấu trúc JSON. (Ví dụ: [ "Như "thế này" là đang phá vỡ cấu trúc JSON bởi vì nó đã bị nhận dạng dấu ngoặc kép bị lỗi" ])
+    - Độ dài của mỗi chuỗi trong mảng JSON phải dưới 30 từ.
     `;
     const chat = genAI.chats.create({
       model: "gemini-2.5-flash-preview-05-20",

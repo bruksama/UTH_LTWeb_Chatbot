@@ -38,13 +38,15 @@ module.exports = {
     return response.text;
   },
 
-  async generateSuggestions({ context, apiKey }) {
+  async generateSuggestions({ context, msg, apiKey }) {
     const genAI = new GoogleGenAI({ apiKey });
     const systemInstruction = `
     Bạn là Jarvis, một chat bot thông minh. Dựa trên lịch sử trò chuyện được cung cấp, hãy đề xuất 3 câu hỏi hoặc hành động tiếp theo mà người dùng có thể muốn hỏi hoặc thực hiện. Chỉ trả về kết quả dưới dạng một mảng JSON gồm 3 chuỗi, không giải thích thêm.
 
+    Các câu hỏi hoặc hành động bạn đề xuất phải là những câu hỏi mà người dùng sẽ hỏi chatbot, tức là phải đóng vai trò là người dùng đặt câu hỏi cho bạn (chatbot).
+
     Lưu ý:
-    - Không định dạng markdown, chỉ trả về mảng JSON 3 chuỗi.
+    - Không định dạng markdown, chỉ trả về mảng JSON 3 chuỗi, cũng không được định dạng markdown trong 3 chuỗi này.
     - Khi sử dụng các ký tự đặc biệt, cần chú ý không làm phá vỡ cấu trúc JSON. (Ví dụ: [ "Như "thế này" là đang phá vỡ cấu trúc JSON bởi vì nó đã bị nhận dạng dấu ngoặc kép bị lỗi" ])
     `;
     const chat = genAI.chats.create({
@@ -52,9 +54,7 @@ module.exports = {
       config: { systemInstruction },
       history: context,
     });
-    const prompt =
-      "Đưa ra 3 gợi ý tiếp theo cho người dùng (câu hỏi hoặc hành động), chỉ trả về mảng JSON 3 chuỗi.";
-    const response = await chat.sendMessage({ message: prompt });
+    const response = await chat.sendMessage({ message: msg });
     try {
       const suggestions = JSON.parse(response.text);
       if (Array.isArray(suggestions) && suggestions.length === 3) {
@@ -62,8 +62,44 @@ module.exports = {
       }
       throw new Error("Invalid suggestions format");
     } catch (e) {
-      // Fallback: return as single string in array
-      return [response.text];
+      const suggestions = response.text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      let arr = [];
+      try {
+        const match = suggestions.match(/\[.*\]/s);
+        if (match) {
+          arr = JSON.parse(match[0]);
+        } else {
+          arr = suggestions
+            .split(/\n|\. |\r/)
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0)
+            .slice(0, 3);
+        }
+        if (!Array.isArray(arr)) arr = [suggestions];
+      } catch (err) {
+        arr = [suggestions];
+      }
+      return arr;
     }
+  },
+
+  async generateSessionName({ msg, apiKey }) {
+    const genAI = new GoogleGenAI({ apiKey });
+    const systemInstruction = `
+    Từ tin nhắn của người dùng, hãy đặt tên cho cuộc trò chuyện này dưới dạng tiêu đề ngắn gọn, không quá dài, không quá 10 từ.
+
+    Lưu ý:
+    - Không định dạng markdown, chỉ trả về một chuỗi.
+    - Độ dài tối đa phải dưới 10 từ.
+    `;
+    const chat = genAI.chats.create({
+      model: "gemini-2.5-flash-lite-preview-06-17",
+      config: { systemInstruction },
+    });
+    const response = await chat.sendMessage({ message: msg });
+    return response.text;
   },
 };

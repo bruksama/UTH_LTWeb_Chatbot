@@ -119,6 +119,30 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
       "user",
       purify.sanitize(marked.parse(msg))
     );
+
+    // Nếu là tin nhắn đầu tiên và tên session là 'Đoạn hội thoại mới', sinh tên mới và cập nhật
+    if (session.title === "Đoạn hội thoại mới") {
+      try {
+        const generatedName = await geminiService.generateSessionName({
+          msg,
+          apiKey: process.env.GEMINI_API_KEY,
+        });
+        if (
+          generatedName &&
+          typeof generatedName === "string" &&
+          generatedName.trim().length > 0
+        ) {
+          await firestoreService.renameSession(
+            uid,
+            sessionId,
+            generatedName.trim()
+          );
+        }
+      } catch (e) {
+        // Nếu lỗi, giữ nguyên tên cũ
+      }
+    }
+
     const messages = await firestoreService.getSessionMessages(uid, sessionId);
 
     const context = messages.slice(0, -1).map((m) => ({
@@ -147,6 +171,7 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
         const suggestionContext = context.slice(-5);
         suggestions = await geminiService.generateSuggestions({
           context: suggestionContext,
+          msg,
           apiKey: apiKeyToUse,
         });
       } catch (e) {

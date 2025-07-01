@@ -102,6 +102,7 @@ Truy cập: [http://localhost:3000](http://localhost:3000)
 ## 7. Bảo mật & tối ưu
 
 - Tích hợp rate limit (60 request/phút/IP) cho API
+- Kiểm soát trạng thái chờ trả lời (isPendingReply) ở mỗi session: mỗi session chỉ gửi được 1 tin nhắn tại một thời điểm, không thể gửi song song khi bot chưa trả lời xong.
 - Validate dữ liệu đầu vào, sanitize dữ liệu trả về
 - Không hardcode thông tin bí mật, bảo mật token
 - Thường xuyên cập nhật dependencies, kiểm tra lỗ hổng

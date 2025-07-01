@@ -102,4 +102,13 @@ module.exports = {
       .doc(sessionId)
       .update({ botStyle });
   },
+  // Cập nhật trạng thái chờ trả lời cho session
+  async setSessionPendingReply(uid, sessionId, isPending) {
+    await db
+      .collection("users")
+      .doc(uid)
+      .collection("sessions")
+      .doc(sessionId)
+      .update({ isPendingReply: isPending });
+  },
 };

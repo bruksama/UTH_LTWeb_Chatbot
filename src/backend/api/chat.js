@@ -100,6 +100,10 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
 
     // Kiểm tra trạng thái debugMode hiện tại
     let session = await firestoreService.getSession(uid, sessionId);
+    if (session.isPendingReply) {
+      return res.status(429).json({ error: "Bot đang trả lời, vui lòng chờ." });
+    }
+    await firestoreService.setSessionPendingReply(uid, sessionId, true);
     let debugMode = session && session.debugMode ? true : false;
     let botStyle = session && session.botStyle ? session.botStyle : "default";
     if (!isValidBotStyle(botStyle)) botStyle = "default";
@@ -191,6 +195,8 @@ router.post("/sendMessage", authenticateFirebaseToken, async (req, res) => {
         });
         console.error(err.message);
       }
+    } finally {
+      await firestoreService.setSessionPendingReply(uid, sessionId, false);
     }
   } catch (err) {
     res.status(500).json({ error: "Lỗi gửi tin nhắn", detail: err.message });

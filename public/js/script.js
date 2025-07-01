@@ -102,6 +102,7 @@ const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 const quickReplies = document.getElementById("quickReplies");
 const attachFileBtn = document.getElementById("attachFile");
+const chatFormBtn = chatForm.querySelector("button");
 
 let lastUserMessage = "";
 
@@ -182,6 +183,7 @@ function clearSuggestions() {
 if (chatForm && chatInput && chatMessages) {
   chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    chatFormBtn.disabled = true;
     const value = chatInput.value.trim();
     if (!value) {
       shakeInput();
@@ -250,6 +252,7 @@ if (chatForm && chatInput && chatMessages) {
       removeBotTyping();
       appendMessage("Lỗi gửi tin nhắn. Vui lòng thử lại.", true);
     }
+    chatFormBtn.disabled = false;
   });
   chatInput.addEventListener("input", clearSuggestions);
 }
@@ -604,7 +607,7 @@ chatInput.addEventListener("input", function () {
 });
 
 chatInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && !e.shiftKey) {
+  if (e.key === "Enter" && !e.shiftKey && !chatFormBtn.disabled) {
     e.preventDefault();
     chatForm.requestSubmit();
   } else if (e.key === "Enter" && e.shiftKey) {

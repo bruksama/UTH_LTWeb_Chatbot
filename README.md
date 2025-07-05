@@ -1,47 +1,54 @@
 # UTH_LTWeb_Chatbot
 
-Website chatbot AI đa phong cách, xây dựng với Node.js, Express, Gemini API, Firebase và giao diện tĩnh sử dụng HTML, CSS, JavaScript, Bootstrap 5.
+Đồ án kết thúc môn webapp chatbot đa phong cách, xây dựng theo mô hình full-stack hiện đại: Node.js, Express, Firebase, Gemini API, Bootstrap 5. Hỗ trợ xác thực người dùng, lưu lịch sử chat, giao diện SPA responsive, bảo mật và dễ mở rộng.
 
-## 1. Tổng quan dự án
+---
 
-- Chatbot AI trả lời tự nhiên, đa phong cách
-- Xác thực người dùng qua Firebase OAuth
-- Lưu trữ lịch sử chat theo từng phiên, từng user trên Firestore
-- Giao diện responsive, tối ưu UI/UX, toast/modal chuẩn accessibility
+## Tính năng nổi bật
 
-## 2. Cấu trúc dự án
+- **Chatbot đa phong cách**: Chọn giữa các kiểu trả lời (mặc định, sáng tạo, ngắn gọn).
+- **Xác thực người dùng**: Đăng nhập an toàn qua Firebase OAuth.
+- **Lưu lịch sử chat**: Mỗi user có nhiều phiên chat, lưu trữ trên Firestore.
+- **Giao diện SPA**: Responsive, tối ưu accessibility, toast/modal, chuyển đổi phiên mượt mà.
+- **Bảo mật**: Rate limit, kiểm tra & làm sạch dữ liệu, không lưu secret trong code.
+- **Dễ mở rộng**: Backend/frontend tách biệt, dễ thêm style bot hoặc tính năng mới.
+- **Kiểm thử**: Unit test backend với Jest, mock Firebase & Gemini API.
 
-```plaintext
-UTH_LTWeb_Chatbot/
-├── public/                # Tài nguyên frontend tĩnh (HTML, CSS, JS, assets)
-├── src/
-│   ├── backend/           # Mã nguồn backend (API, service, middleware)
-│   └── shared/            # Tài nguyên dùng chung khác, style bot, util
-├── package.json           # Thư viện phụ thuộc & script
-├── pnpm-lock.yaml         # Quản lý version phụ thuộc
-└── README.md              # Tài liệu này
-```
+---
 
-## 3. Luồng hoạt động
+## Kiến trúc tổng thể
 
-1. Người dùng đăng nhập qua Firebase OAuth
-2. Truy cập giao diện chính `/`
-3. Lấy danh sách phiên chat `/api/chat/sessions`
-4. Tạo phiên mới `/api/chat/newSession` (chọn style)
-5. Gửi tin nhắn `/api/chat/sendMessage` (backend xử lý, lưu, trả kết quả)
-6. Lưu toàn bộ lịch sử chat trên Firestore
+### Backend (`/src/backend/`)
 
-## 4. API Backend
+- **Express API**: Xử lý xác thực, quản lý phiên chat, gửi/nhận tin nhắn.
+- **Service**:
+  - `authService.js`: Xác thực token Firebase.
+  - `firestoreService.js`: CRUD phiên/chat, quản lý trạng thái chờ trả lời.
+  - `geminiService.js`: Tích hợp Gemini API cho AI trả lời & gợi ý.
+- **Middleware**: `firebaseAuth.js` bảo vệ các endpoint chat.
+- **Bảo mật**: Giới hạn 60 req/phút/IP, validate & sanitize dữ liệu.
 
-| Method | Endpoint              | Chức năng                                 |
-| ------ | --------------------- | ----------------------------------------- |
-| POST   | /api/auth/login       | Xác thực Firebase ID token                |
-| GET    | /api/chat/sessions    | Lấy danh sách phiên chat của user         |
-| POST   | /api/chat/newSession  | Tạo phiên chat mới, chọn style            |
-| GET    | /api/chat/session/:id | Lấy toàn bộ tin nhắn trong một phiên      |
-| POST   | /api/chat/sendMessage | Gửi message, gọi Gemini API, lưu & trả về |
+### Frontend (`/public/`)
 
-## 5. Firestore Structure
+- **HTML/CSS/JS**: SPA với Bootstrap 5, responsive, tối ưu accessibility.
+- **JS Logic** (`public/js/script.js`):
+  - Quản lý trạng thái đăng nhập, CRUD phiên, gửi tin nhắn, cập nhật UI.
+  - Điều hướng SPA, modal cài đặt (đổi tên phiên, chọn style, lưu API key Gemini vào localStorage).
+  - Hỗ trợ accessibility: trap focus, ARIA, điều hướng bàn phím, toast/modal.
+
+### Shared (`/src/shared/`)
+
+- **botStyles.js**: Định nghĩa các phong cách trả lời của bot.
+- **utils.js**: Tiện ích dùng chung (ví dụ: định dạng thời gian).
+
+### Kiểm thử (`/tests/`)
+
+- **Jest**: Unit test cho các service backend (auth, Firestore, Gemini).
+- **Mock**: Giả lập Firebase & Gemini API để kiểm thử độc lập.
+
+---
+
+## Mô hình dữ liệu Firestore
 
 ```
 users (collection)
@@ -49,12 +56,36 @@ users (collection)
       ├─ email, displayName
       └─ sessions (subcollection)
           └─ {sessionId} (document)
-              ├─ title, botStyle, debugMode
+              ├─ title, botStyle, debugMode, isPendingReply
               └─ messages (subcollection)
                   └─ {messageId} (sender, content, timestamp)
 ```
 
-## 6. Cài đặt & chạy dự án
+---
+
+## API Backend
+
+| Method       | Endpoint              | Chức năng                                         |
+| ------------ | --------------------- | ------------------------------------------------- |
+| POST         | /api/auth/login       | Xác thực Firebase ID token                        |
+| GET          | /api/chat/sessions    | Lấy danh sách phiên chat của user (cần đăng nhập) |
+| POST         | /api/chat/newSession  | Tạo phiên chat mới, chọn style                    |
+| GET          | /api/chat/session/:id | Lấy toàn bộ tin nhắn trong một phiên              |
+| POST         | /api/chat/sendMessage | Gửi tin nhắn, nhận trả lời từ Gemini, lưu kết quả |
+| PATCH/DELETE | /api/chat/session/:id | Đổi tên/đổi style/xóa phiên chat                  |
+
+---
+
+## Bảo mật & Best Practices
+
+- **Trạng thái chờ trả lời**: Mỗi phiên chỉ gửi được 1 tin nhắn tại một thời điểm (`isPendingReply`), tránh gửi song song khi bot chưa trả lời xong.
+- **Validate & sanitize**: Kiểm tra và làm sạch toàn bộ dữ liệu đầu vào/ra.
+- **Không lưu secret trong code**: Sử dụng `.env` cho thông tin nhạy cảm (không commit lên repo).
+- **Cập nhật dependencies**: Thường xuyên update và kiểm tra lỗ hổng bảo mật.
+
+---
+
+## Hướng dẫn cài đặt & chạy
 
 ### Yêu cầu
 
@@ -66,55 +97,39 @@ users (collection)
 ### Cài đặt
 
 ```bash
-# Clone repo
-$ git clone <repository-url>
-$ cd UTH_LTWeb_Chatbot
+git clone https://github.com/bruksama/UTH_LTWeb_Chatbot.git
+cd UTH_LTWeb_Chatbot
 
-# Cài đặt phụ thuộc
-$ pnpm install
+pnpm install
 # hoặc
-$ npm install
+npm install
 ```
 
 ### Thiết lập cấu hình
 
 - Tạo file `.env` từ mẫu `.env.example` và điền:
-  - `GEMINI_API_KEY`: API key Gemini
-  - `FIREBASE_SERVICE_ACCOUNT`: Thông tin service account Firebase (JSON)
-  - `PORT`: (tuỳ chọn, mặc định 3000)
+  - `GEMINI_API_KEY`
+  - `FIREBASE_SERVICE_ACCOUNT` (JSON)
+  - `PORT` (tùy chọn, mặc định 3000)
 
 ### Khởi chạy
 
 ```bash
 # Production
-$ pnpm start
+pnpm start
 # hoặc
-$ npm start
+npm start
 
 # Phát triển (tự reload khi code thay đổi)
-$ pnpm run dev
+pnpm run dev
 # hoặc
-$ npm run dev
+npm run dev
 ```
 
 Truy cập: [http://localhost:3000](http://localhost:3000)
 
-## 7. Bảo mật & tối ưu
-
-- Tích hợp rate limit (60 request/phút/IP) cho API
-- Kiểm soát trạng thái chờ trả lời (isPendingReply) ở mỗi session: mỗi session chỉ gửi được 1 tin nhắn tại một thời điểm, không thể gửi song song khi bot chưa trả lời xong.
-- Validate dữ liệu đầu vào, sanitize dữ liệu trả về
-- Không hardcode thông tin bí mật, bảo mật token
-- Thường xuyên cập nhật dependencies, kiểm tra lỗ hổng
-
-## 8. Định hướng phát triển
-
-- Bổ sung các style bot mới, tuỳ biến sâu hơn
-- Thêm phân tích biểu đồ, gợi ý hỏi tiếp
-- Tối ưu UI/UX, accessibility, trạng thái toast
-- Bổ sung unit test cho backend
-- Tích hợp thêm dịch vụ AI khác nếu cần
-
 ---
 
-**Mọi góp ý, báo lỗi hoặc đề xuất vui lòng tạo issue trên repository.**
+## Đóng góp & phát triển
+
+- Mọi góp ý, báo lỗi hoặc đề xuất vui lòng tạo issue hoặc pull request.
